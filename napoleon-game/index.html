@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>皇上的锦囊：拿破仑的帝国危局</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cormorant+Garamond:wght@300;400;600;700&family=Noto+Serif+SC:wght@300;400;600;700;900&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
+<style>
+/* ==================== CSS VARIABLES ==================== */
+:root {
+  --bg-deep: #080b14;
+  --bg-panel: #0d1020;
+  --gold: #c9a84c;
+  --gold-light: #e0c878;
+  --gold-dark: #8b6914;
+  --crimson: #8b1e1e;
+  --crimson-light: #b53030;
+  --parchment: #f4e4c1;
+  --parchment-dark: #d4c4a0;
+  --text-light: #e8e0d0;
+  --text-dim: #a09888;
+  --border-ornate: #3a3020;
+  --imperial-blue: #1a2a5e;
+  --success: #4a8c3f;
+  --danger: #a03030;
+  --warning: #c08030;
+}
+
+/* ==================== BASE ==================== */
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { width:100%; height:100%; overflow:hidden; }
+body {
+  font-family:'Cormorant Garamond','Noto Serif SC',serif;
+  background:var(--bg-deep);
+  color:var(--text-light);
+  display:flex; justify-content:center; align-items:center;
+  user-select:none; -webkit-user-select:none;
+}
+
+/* ==================== BACKGROUND EFFECTS ==================== */
+#bg-overlay {
+  position:fixed; top:0; left:0; width:100%; height:100%;
+  pointer-events:none; z-index:0;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(201,168,76,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 100%, rgba(139,30,30,0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 20% 80%, rgba(26,42,94,0.1) 0%, transparent 50%);
+}
+#particles { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; }
+
+/* ==================== MAIN CONTAINER ==================== */
+#app {
+  position:relative; z-index:1;
+  width:100%; max-width:900px; height:100vh; max-height:700px;
+  display:flex; flex-direction:column;
+  padding:15px;
+}
+
+/* ==================== STATS BAR ==================== */
+#stats-bar {
+  display:flex; gap:12px; margin-bottom:12px; flex-shrink:0;
+}
+.stat-item {
+  flex:1; background:var(--bg-panel);
+  border:1px solid var(--border-ornate); border-radius:6px;
+  padding:10px 14px; text-align:center;
+  position:relative; overflow:hidden;
+}
+.stat-item::before {
+  content:''; position:absolute; top:0; left:0; width:100%; height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+}
+.stat-label {
+  font-family:'Cinzel',serif; font-size:10px; letter-spacing:2px;
+  color:var(--text-dim); text-transform:uppercase; margin-bottom:4px;
+}
+.stat-value {
+  font-family:'Cinzel',serif; font-size:26px; font-weight:900;
+  color:var(--gold-light); transition:color 0.5s;
+}
+.stat-value.danger { color:var(--danger); animation:pulse 0.8s infinite; }
+.stat-value.success { color:var(--success); }
+.stat-bar-bg {
+  height:3px; background:rgba(255,255,255,0.05); border-radius:2px; margin-top:6px;
+}
+.stat-bar-fill {
+  height:100%; border-radius:2px; transition:width 0.8s cubic-bezier(0.4,0,0.2,1);
+}
+.stat-bar-fill.stability { background:linear-gradient(90deg,var(--crimson),var(--gold-light),var(--success)); }
+.stat-bar-fill.army { background:linear-gradient(90deg,var(--danger),var(--warning),var(--gold-light)); }
+
+/* ==================== GAME PANEL ==================== */
+#game-panel {
+  flex:1; background:var(--bg-panel);
+  border:1px solid var(--border-ornate); border-radius:8px;
+  display:flex; flex-direction:column; overflow:hidden;
+  position:relative;
+  box-shadow:0 0 60px rgba(201,168,76,0.05), inset 0 0 100px rgba(0,0,0,0.3);
+}
+
+/* ==================== DIALOGUE AREA ==================== */
+#dialogue-area {
+  flex:1; overflow-y:auto; padding:20px 24px;
+  display:flex; flex-direction:column; gap:14px;
+  scroll-behavior:smooth;
+}
+#dialogue-area::-webkit-scrollbar { width:4px; }
+#dialogue-area::-webkit-scrollbar-track { background:transparent; }
+#dialogue-area::-webkit-scrollbar-thumb { background:var(--border-ornate); border-radius:2px; }
+
+/* Dialogue bubbles */
+.msg {
+  max-width:85%; padding:14px 18px; border-radius:10px;
+  font-size:16px; line-height:1.7; animation:msgIn 0.4s ease-out;
+  position:relative;
+}
+.msg.napoleon {
+  align-self:flex-start; background:linear-gradient(135deg,#1a1a2e,#16213e);
+  border:1px solid var(--gold-dark); border-left:3px solid var(--gold);
+  color:var(--text-light);
+}
+.msg.napoleon::before {
+  content:'👑 '; font-size:14px;
+}
+.msg.advisor {
+  align-self:flex-end; background:linear-gradient(135deg,#1a2e1a,#1e2a1e);
+  border:1px solid #3a5030; border-right:3px solid #6a8a50;
+  color:#d0e0c0;
+}
+.msg.system {
+  align-self:center; background:rgba(139,30,30,0.2);
+  border:1px solid var(--crimson); font-size:14px; color:var(--warning);
+  text-align:center; max-width:95%;
+}
+.msg.narration {
+  align-self:center; background:rgba(26,42,94,0.25);
+  border:1px dashed var(--imperial-blue); font-size:14px;
+  color:var(--text-dim); font-style:italic; text-align:center; max-width:95%;
+}
+
+@keyframes msgIn {
+  from { opacity:0; transform:translateY(10px); }
+  to { opacity:1; transform:translateY(0); }
+}
+
+/* ==================== CHOICES ==================== */
+#choices-container {
+  padding:14px 24px 18px; flex-shrink:0;
+  display:flex; flex-direction:column; gap:8px;
+  border-top:1px solid var(--border-ornate);
+  background:linear-gradient(0deg,rgba(0,0,0,0.4),transparent);
+}
+.choice-btn {
+  width:100%; padding:13px 18px; text-align:left;
+  background:linear-gradient(135deg,rgba(26,42,94,0.3),rgba(13,16,32,0.6));
+  border:1px solid var(--border-ornate); border-radius:6px;
+  color:var(--text-light); font-family:'Noto Serif SC',serif; font-size:15px;
+  cursor:pointer; transition:all 0.25s; position:relative; overflow:hidden;
+}
+.choice-btn:hover {
+  border-color:var(--gold-dark); background:linear-gradient(135deg,rgba(201,168,76,0.15),rgba(26,42,94,0.25));
+  transform:translateX(4px); box-shadow:0 0 20px rgba(201,168,76,0.1);
+}
+.choice-btn:active { transform:scale(0.98); }
+.choice-btn .choice-letter {
+  display:inline-block; width:28px; height:28px; line-height:28px;
+  text-align:center; background:var(--gold-dark); color:#000;
+  font-family:'Cinzel',serif; font-weight:700; font-size:13px;
+  border-radius:3px; margin-right:10px;
+}
+.choice-btn.selected {
+  border-color:var(--gold-light); background:rgba(201,168,76,0.25);
+  box-shadow:0 0 30px rgba(201,168,76,0.2);
+}
+
+/* Free input area for Act 4 */
+#free-input-container {
+  padding:14px 24px 18px; flex-shrink:0; display:none;
+  border-top:1px solid var(--border-ornate);
+  background:linear-gradient(0deg,rgba(0,0,0,0.4),transparent);
+}
+#free-input-row { display:flex; gap:8px; }
+#free-input {
+  flex:1; padding:13px 18px;
+  background:rgba(0,0,0,0.4); border:1px solid var(--gold-dark);
+  border-radius:6px; color:var(--text-light);
+  font-family:'Noto Serif SC',serif; font-size:15px;
+  outline:none; transition:border-color 0.3s;
+}
+#free-input:focus { border-color:var(--gold-light); box-shadow:0 0 20px rgba(201,168,76,0.15); }
+#free-input::placeholder { color:var(--text-dim); }
+#send-btn {
+  padding:13px 28px; background:linear-gradient(135deg,var(--gold-dark),#6b5010);
+  border:1px solid var(--gold); border-radius:6px; color:#000;
+  font-family:'Cinzel',serif; font-weight:700; font-size:15px;
+  cursor:pointer; transition:all 0.25s; white-space:nowrap;
+}
+#send-btn:hover { background:linear-gradient(135deg,var(--gold),var(--gold-light)); box-shadow:0 0 25px rgba(201,168,76,0.3); }
+#send-btn:disabled { opacity:0.5; cursor:not-allowed; }
+
+/* ==================== SCREENS ==================== */
+.screen { display:none; flex-direction:column; align-items:center; justify-content:center;
+  width:100%; height:100%; text-align:center; padding:30px; }
+
+/* SETUP SCREEN */
+#setup-screen { display:flex; }
+#setup-card {
+  background:var(--bg-panel); border:1px solid var(--border-ornate);
+  border-radius:10px; padding:35px 40px; max-width:550px; width:100%;
+  box-shadow:0 0 80px rgba(201,168,76,0.08);
+}
+#setup-card h1 {
+  font-family:'Cinzel',serif; font-size:28px; color:var(--gold-light);
+  margin-bottom:6px; letter-spacing:3px;
+}
+#setup-card .subtitle {
+  font-family:'Ma Shan Zheng',cursive; font-size:20px; color:var(--text-dim); margin-bottom:25px;
+}
+.input-group { margin-bottom:16px; text-align:left; }
+.input-group label {
+  display:block; font-size:13px; color:var(--text-dim); margin-bottom:6px;
+  font-family:'Cinzel',serif; letter-spacing:1px;
+}
+.input-group input, .input-group select {
+  width:100%; padding:12px 16px;
+  background:rgba(0,0,0,0.4); border:1px solid var(--border-ornate);
+  border-radius:6px; color:var(--text-light); font-size:15px;
+  font-family:'Noto Serif SC',serif; outline:none; transition:border-color 0.3s;
+}
+.input-group input:focus, .input-group select:focus { border-color:var(--gold-dark); }
+.input-group select { cursor:pointer; }
+.input-group select option { background:var(--bg-panel); color:var(--text-light); }
+
+#detect-btn, #start-btn {
+  width:100%; padding:14px; border-radius:6px;
+  font-family:'Cinzel',serif; font-size:16px; font-weight:700;
+  cursor:pointer; transition:all 0.3s; letter-spacing:2px; text-transform:uppercase;
+}
+#detect-btn {
+  background:transparent; border:1px solid var(--gold-dark); color:var(--gold-light);
+  margin-bottom:10px;
+}
+#detect-btn:hover:not(:disabled) { background:rgba(201,168,76,0.1); }
+#start-btn {
+  background:linear-gradient(135deg,#6b5010,var(--gold-dark));
+  border:1px solid var(--gold); color:#000;
+  font-size:18px;
+}
+#start-btn:hover:not(:disabled) { background:linear-gradient(135deg,var(--gold),var(--gold-light)); box-shadow:0 0 30px rgba(201,168,76,0.3); }
+#start-btn:disabled, #detect-btn:disabled { opacity:0.4; cursor:not-allowed; }
+
+#api-status { font-size:13px; margin-top:10px; min-height:20px; }
+#api-status.success { color:var(--success); }
+#api-status.error { color:var(--danger); }
+#api-status.loading { color:var(--warning); }
+
+/* INTRO SCREEN */
+#intro-screen { display:none; }
+#intro-content {
+  max-width:650px; animation:fadeIn 1.5s ease-out;
+}
+@keyframes fadeIn { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
+#intro-content h1 {
+  font-family:'Cinzel',serif; font-size:38px; color:var(--gold-light);
+  margin-bottom:8px; letter-spacing:4px; text-shadow:0 0 40px rgba(201,168,76,0.3);
+}
+#intro-content .chinese-title {
+  font-family:'Ma Shan Zheng',cursive; font-size:28px; color:var(--gold);
+  margin-bottom:20px;
+}
+#intro-content .intro-text {
+  font-size:18px; line-height:2; color:var(--text-dim); margin-bottom:30px;
+}
+#intro-content .role-badge {
+  display:inline-block; padding:10px 24px;
+  border:1px solid var(--gold-dark); border-radius:20px;
+  color:var(--gold-light); font-size:16px; margin-bottom:30px;
+}
+#begin-btn {
+  padding:16px 60px; font-size:20px;
+  background:linear-gradient(135deg,#6b5010,var(--gold-dark));
+  border:1px solid var(--gold); border-radius:8px; color:#000;
+  font-family:'Cinzel',serif; font-weight:700; cursor:pointer;
+  letter-spacing:4px; transition:all 0.3s;
+}
+#begin-btn:hover { background:linear-gradient(135deg,var(--gold),var(--gold-light)); box-shadow:0 0 40px rgba(201,168,76,0.35); transform:scale(1.05); }
+
+/* ENDING SCREEN */
+#ending-screen { display:none; }
+#ending-content {
+  max-width:650px; animation:fadeIn 2s ease-out;
+}
+#ending-content h1 {
+  font-family:'Cinzel',serif; font-size:36px; letter-spacing:4px; margin-bottom:12px;
+}
+#ending-content .ending-rank { font-size:60px; margin:15px 0; }
+#ending-content .ending-text { font-size:18px; line-height:2; color:var(--text-dim); margin:15px 0 25px; }
+#ending-stats { display:flex; gap:20px; justify-content:center; margin:20px 0; flex-wrap:wrap; }
+#ending-stats .end-stat {
+  background:var(--bg-panel); border:1px solid var(--border-ornate);
+  border-radius:8px; padding:16px 24px; text-align:center; min-width:120px;
+}
+.end-stat .end-stat-val { font-family:'Cinzel',serif; font-size:30px; font-weight:900; color:var(--gold-light); }
+.end-stat .end-stat-lbl { font-size:12px; color:var(--text-dim); letter-spacing:2px; }
+
+#replay-btn {
+  padding:14px 50px; font-size:18px;
+  background:transparent; border:1px solid var(--gold-dark); border-radius:6px;
+  color:var(--gold-light); font-family:'Cinzel',serif; font-weight:600;
+  cursor:pointer; letter-spacing:3px; transition:all 0.3s;
+}
+#replay-btn:hover { background:rgba(201,168,76,0.1); box-shadow:0 0 25px rgba(201,168,76,0.2); }
+
+/* ==================== MUSIC CONTROLS ==================== */
+#music-controls {
+  position:fixed; bottom:20px; right:20px; z-index:100;
+  display:flex; align-items:center; gap:8px;
+  background:rgba(13,16,32,0.9); border:1px solid var(--border-ornate);
+  border-radius:25px; padding:8px 16px;
+  backdrop-filter:blur(10px); transition:all 0.3s;
+}
+#music-controls.collapsed { padding:8px 12px; }
+#music-toggle {
+  width:36px; height:36px; border-radius:50%; cursor:pointer;
+  background:transparent; border:1px solid var(--gold-dark);
+  color:var(--gold-light); font-size:18px; display:flex;
+  align-items:center; justify-content:center; transition:all 0.3s;
+  flex-shrink:0;
+}
+#music-toggle:hover { border-color:var(--gold); box-shadow:0 0 15px rgba(201,168,76,0.3); }
+#music-toggle.muted { border-color:var(--text-dim); color:var(--text-dim); }
+#volume-slider {
+  -webkit-appearance:none; appearance:none; width:80px; height:4px;
+  background:var(--border-ornate); border-radius:2px; outline:none;
+  cursor:pointer; transition:opacity 0.3s;
+}
+#volume-slider::-webkit-slider-thumb {
+  -webkit-appearance:none; width:14px; height:14px; border-radius:50%;
+  background:var(--gold-light); cursor:pointer; border:2px solid var(--gold-dark);
+}
+#music-label {
+  font-size:10px; color:var(--text-dim); letter-spacing:1px;
+  font-family:'Cinzel',serif; white-space:nowrap;
+}
+
+/* ==================== LOADING OVERLAY ==================== */
+#loading-overlay {
+  position:fixed; top:0; left:0; width:100%; height:100%;
+  background:rgba(8,11,20,0.85); z-index:200;
+  display:none; justify-content:center; align-items:center; flex-direction:column;
+}
+#loading-overlay.active { display:flex; }
+#loading-spinner {
+  width:50px; height:50px; border:3px solid var(--border-ornate);
+  border-top-color:var(--gold); border-radius:50%; animation:spin 1s linear infinite;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+#loading-text { margin-top:15px; color:var(--text-dim); font-size:14px; }
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width:600px) {
+  #app { max-height:100vh; padding:8px; }
+  #stats-bar { gap:6px; }
+  .stat-item { padding:6px 8px; }
+  .stat-value { font-size:18px; }
+  .stat-label { font-size:8px; }
+  .msg { max-width:92%; font-size:14px; padding:10px 14px; }
+  #choices-container { padding:10px 12px; }
+  .choice-btn { font-size:13px; padding:10px 14px; }
+  #setup-card { padding:20px; }
+  #setup-card h1 { font-size:22px; }
+  #intro-content h1 { font-size:26px; }
+  #free-input-row { flex-direction:column; }
+  #music-controls { bottom:10px; right:10px; padding:6px 12px; }
+  #volume-slider { width:50px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Background effects -->
+<div id="bg-overlay"></div>
+<canvas id="particles"></canvas>
+
+<!-- Loading overlay -->
+<div id="loading-overlay">
+  <div id="loading-spinner"></div>
+  <div id="loading-text">皇帝正在思考...</div>
+</div>
+
+<!-- Music controls -->
+<div id="music-controls" class="collapsed">
+  <button id="music-toggle" title="背景音乐" onclick="toggleMusic()">🎵</button>
+  <input type="range" id="volume-slider" min="0" max="100" value="35" oninput="setVolume(this.value)" title="音量">
+  <span id="music-label">BGM</span>
+</div>
+
+<!-- Main app container -->
+<div id="app">
+
+  <!-- Stats bar -->
+  <div id="stats-bar">
+    <div class="stat-item">
+      <div class="stat-label">🏛️ 帝国稳定度</div>
+      <div class="stat-value" id="stability-val">100</div>
+      <div class="stat-bar-bg"><div class="stat-bar-fill stability" id="stability-bar" style="width:100%"></div></div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">⚔️ 法军主力</div>
+      <div class="stat-value" id="army-val">60万</div>
+      <div class="stat-bar-bg"><div class="stat-bar-fill army" id="army-bar" style="width:100%"></div></div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">👑 皇帝信任</div>
+      <div class="stat-value" id="trust-val">0</div>
+      <div class="stat-bar-bg"><div class="stat-bar-fill stability" id="trust-bar" style="width:50%"></div></div>
+    </div>
+  </div>
+
+  <!-- Game panel -->
+  <div id="game-panel">
+    <!-- Screens -->
+    <div id="setup-screen" class="screen">
+      <div id="setup-card">
+        <h1>JEU DE L'EMPIRE</h1>
+        <div class="subtitle">皇上的锦囊：拿破仑的帝国危局</div>
+
+        <div class="input-group">
+          <label>🔑 Gemini API Key</label>
+          <input type="password" id="api-key-input" placeholder="输入你的 Google Gemini API Key...">
+          <div id="api-status"></div>
+        </div>
+
+        <button id="detect-btn" onclick="detectModels()">🔍 自动检测可用模型</button>
+
+        <div class="input-group" style="display:none;" id="model-select-group">
+          <label>🤖 选择模型</label>
+          <select id="model-select"></select>
+        </div>
+
+        <button id="start-btn" disabled onclick="startGame()">⚜️ 进入帝国战争 ⚜️</button>
+        <div style="font-size:11px; color:var(--text-dim); margin-top:12px;">
+          ⚠️ API Key 仅在本地浏览器使用，不会被上传<br>
+          💡 免费获取 Key: <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--gold);">aistudio.google.com/apikey</a>
+        </div>
+      </div>
+    </div>
+
+    <div id="intro-screen" class="screen">
+      <div id="intro-content">
+        <h1>⚜️ NAPOLÉON ⚜️</h1>
+        <div class="chinese-title">皇上的锦囊：拿破仑的帝国危局</div>
+        <div class="role-badge">🎖️ 法兰西第一帝国 · 最高参谋部首席历史顾问</div>
+        <div class="intro-text">
+          1812年，欧洲大陆暗流涌动。<br>
+          大陆封锁令施行四年，走私猖獗，英国屹立不倒。<br>
+          沙皇亚历山大公然违令，向英国商人敞开港口……<br><br>
+          <strong>拿破仑皇帝</strong>召见了你——<br>
+          <em>他的首席历史顾问。</em><br><br>
+          帝国有两场危机：<br>
+          🔒 <strong>大陆封锁执行难</strong><br>
+          🐻 <strong>俄国公然违令通商</strong><br><br>
+          你的每一个建议，都将影响帝国的命运。<br>
+          你的每一次误判，都将付出鲜血与荣耀的代价。
+        </div>
+        <button id="begin-btn" onclick="beginGame()">⚔️ 进入战争议会 ⚔️</button>
+        <div style="margin-top:15px; font-size:13px; color:var(--text-dim); cursor:pointer;" onclick="showScreen('setup')">⚙️ 返回设置 / 更换模型</div>
+      </div>
+    </div>
+
+    <div id="game-screen" style="display:none; flex-direction:column; height:100%;">
+      <div id="dialogue-area"></div>
+      <div id="choices-container"></div>
+      <div id="free-input-container">
+        <div id="free-input-row">
+          <input type="text" id="free-input" placeholder="向皇帝陛下建言献策..." maxlength="500">
+          <button id="send-btn" onclick="submitAdvice()">📜 进言</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="ending-screen" class="screen">
+      <div id="ending-content">
+        <div class="ending-rank" id="ending-icon"></div>
+        <h1 id="ending-title"></h1>
+        <div class="ending-text" id="ending-text"></div>
+        <div id="ending-stats"></div>
+        <div id="ending-tracing" style="font-size:14px; color:var(--gold); margin:15px 0; line-height:1.8;"></div>
+        <button id="replay-btn" onclick="replayGame()">🔄 再次披挂上阵</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==================== GAME ENGINE ====================
+const GS = {
+  stability: 100,
+  army: 600000,
+  trust: 0,
+  correctCount: 0,
+  wrongCount: 0,
+  stage: 'setup',
+  historyLog: [],
+  hasSupply: false,
+  apiKey: '',
+  selectedModel: '',
+  availableModels: [],
+  act4Turn: 0,
+  maxAct4Turns: 8,
+};
+
+// ==================== AUDIO ENGINE ====================
+let audioCtx = null;
+let masterGain = null;
+let musicGain = null;
+let musicNodes = [];
+let musicPlaying = false;
+let musicMuted = false;
+let bgmVolume = 0.35;
+
+function initAudio() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = 0.5;
+    masterGain.connect(audioCtx.destination);
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+
+function playClick() {
+  if (!audioCtx) return;
+  const t = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'sine'; osc.frequency.setValueAtTime(800, t);
+  osc.frequency.exponentialRampToValueAtTime(600, t + 0.08);
+  gain.gain.setValueAtTime(0.15, t);
+  gain.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+  osc.connect(gain); gain.connect(masterGain);
+  osc.start(t); osc.stop(t + 0.1);
+}
+
+function playSuccess() {
+  if (!audioCtx) return;
+  const t = audioCtx.currentTime;
+  [523, 659, 784].forEach((freq, i) => {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'triangle'; osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.12, t + i * 0.12);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + i * 0.12 + 0.2);
+    osc.connect(gain); gain.connect(masterGain);
+    osc.start(t + i * 0.12); osc.stop(t + i * 0.12 + 0.25);
+  });
+}
+
+function playFail() {
+  if (!audioCtx) return;
+  const t = audioCtx.currentTime;
+  [400, 300, 200].forEach((freq, i) => {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sawtooth'; osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.08, t + i * 0.15);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + i * 0.15 + 0.25);
+    osc.connect(gain); gain.connect(masterGain);
+    osc.start(t + i * 0.15); osc.stop(t + i * 0.15 + 0.3);
+  });
+}
+
+function playFanfare() {
+  if (!audioCtx) return;
+  const t = audioCtx.currentTime;
+  [392, 523, 659, 784, 1047].forEach((freq, i) => {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'triangle'; osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.1, t + i * 0.1);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + i * 0.1 + 0.4);
+    osc.connect(gain); gain.connect(masterGain);
+    osc.start(t + i * 0.1); osc.stop(t + i * 0.1 + 0.5);
+  });
+}
+
+function startMusic() {
+  initAudio();
+  if (musicPlaying) return;
+  musicPlaying = true;
+  musicGain = audioCtx.createGain();
+  musicGain.gain.value = bgmVolume;
+  musicGain.connect(masterGain);
+
+  // Layer 1: Deep bass drone — tension
+  const bass = audioCtx.createOscillator();
+  const bassGain = audioCtx.createGain();
+  bass.type = 'sine'; bass.frequency.value = 55;
+  bassGain.gain.value = 0.18;
+  const bassFilter = audioCtx.createBiquadFilter();
+  bassFilter.type = 'lowpass'; bassFilter.frequency.value = 200;
+  bass.connect(bassFilter); bassFilter.connect(bassGain); bassGain.connect(musicGain);
+  bass.start();
+  musicNodes.push(bass, bassGain, bassFilter);
+
+  // Layer 2: Slow modulation pad — atmosphere
+  const pad = audioCtx.createOscillator();
+  const padGain = audioCtx.createGain();
+  pad.type = 'triangle'; pad.frequency.value = 110;
+  padGain.gain.value = 0.06;
+  const padFilter = audioCtx.createBiquadFilter();
+  padFilter.type = 'lowpass'; padFilter.frequency.value = 400;
+  const lfo = audioCtx.createOscillator();
+  const lfoGain = audioCtx.createGain();
+  lfo.type = 'sine'; lfo.frequency.value = 0.07;
+  lfoGain.gain.value = 15;
+  lfo.connect(lfoGain); lfoGain.connect(pad.frequency);
+  lfo.start();
+  pad.connect(padFilter); padFilter.connect(padGain); padGain.connect(musicGain);
+  pad.start();
+  musicNodes.push(pad, padGain, padFilter, lfo, lfoGain);
+
+  // Layer 3: Low rumble — distant drums
+  const noiseSource = audioCtx.createOscillator();
+  const noiseGain = audioCtx.createGain();
+  noiseSource.type = 'sawtooth'; noiseSource.frequency.value = 30;
+  noiseGain.gain.value = 0.03;
+  const noiseFilter = audioCtx.createBiquadFilter();
+  noiseFilter.type = 'lowpass'; noiseFilter.frequency.value = 80;
+  const drumLfo = audioCtx.createOscillator();
+  const drumLfoGain = audioCtx.createGain();
+  drumLfo.type = 'square'; drumLfo.frequency.value = 0.5;
+  drumLfoGain.gain.value = 30;
+  drumLfo.connect(drumLfoGain); drumLfoGain.connect(noiseSource.frequency);
+  drumLfo.start();
+  noiseSource.connect(noiseFilter); noiseFilter.connect(noiseGain); noiseGain.connect(musicGain);
+  noiseSource.start();
+  musicNodes.push(noiseSource, noiseGain, noiseFilter, drumLfo, drumLfoGain);
+
+  document.getElementById('music-toggle').classList.remove('muted');
+  document.getElementById('music-controls').classList.remove('collapsed');
+  document.getElementById('music-label').textContent = 'BGM ON';
+}
+
+function stopMusic() {
+  musicNodes.forEach(n => { try { n.stop(); } catch(e) {} });
+  musicNodes = [];
+  musicPlaying = false;
+}
+
+function toggleMusic() {
+  initAudio();
+  if (!musicPlaying) {
+    startMusic();
+  } else {
+    musicMuted = !musicMuted;
+    if (musicGain) musicGain.gain.value = musicMuted ? 0 : bgmVolume;
+    const btn = document.getElementById('music-toggle');
+    if (musicMuted) { btn.classList.add('muted'); btn.textContent = '🔇'; }
+    else { btn.classList.remove('muted'); btn.textContent = '🎵'; }
+    document.getElementById('music-label').textContent = musicMuted ? 'MUTED' : 'BGM ON';
+  }
+}
+
+function setVolume(val) {
+  bgmVolume = val / 100;
+  if (musicGain && !musicMuted) musicGain.gain.value = bgmVolume;
+}
+
+// ==================== VOICE (TTS) ====================
+function speak(text, lang='zh-CN') {
+  if (!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  // Strip emoji and markup for speech
+  const clean = text.replace(/[\p{Emoji}]/gu, '').replace(/<[^>]*>/g, '').trim();
+  if (!clean) return;
+  const utt = new SpeechSynthesisUtterance(clean);
+  utt.lang = lang;
+  utt.rate = 0.9;
+  utt.pitch = lang === 'zh-CN' ? 0.85 : 1;
+  utt.volume = 0.8;
+  // Try to find a deep voice
+  const voices = speechSynthesis.getVoices();
+  const deep = voices.find(v => v.lang.startsWith('zh') || v.lang.startsWith('en-US'));
+  if (deep) utt.voice = deep;
+  speechSynthesis.speak(utt);
+}
+
+// ==================== PARTICLES ====================
+function initParticles() {
+  const canvas = document.getElementById('particles');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const particles = [];
+  for (let i = 0; i < 40; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      size: Math.random() * 2 + 0.5,
+      speed: Math.random() * 0.3 + 0.1,
+      opacity: Math.random() * 0.5 + 0.1,
+      phase: Math.random() * Math.PI * 2,
+    });
+  }
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => {
+      p.y -= p.speed;
+      p.opacity = 0.15 + Math.sin(Date.now() * 0.001 + p.phase) * 0.1;
+      if (p.y < -10) { p.y = canvas.height + 10; p.x = Math.random() * canvas.width; }
+      ctx.fillStyle = `rgba(201,168,76,${p.opacity})`;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill();
+    });
+    requestAnimationFrame(animate);
+  }
+  animate();
+  window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+}
+
+// ==================== UI HELPERS ====================
+function updateStats() {
+  const sv = document.getElementById('stability-val');
+  const sb = document.getElementById('stability-bar');
+  const av = document.getElementById('army-val');
+  const ab = document.getElementById('army-bar');
+  const tv = document.getElementById('trust-val');
+  const tb = document.getElementById('trust-bar');
+
+  sv.textContent = GS.stability;
+  sb.style.width = Math.max(0, GS.stability) + '%';
+  sv.className = 'stat-value' + (GS.stability < 40 ? ' danger' : GS.stability > 80 ? ' success' : '');
+
+  const armyDisplay = GS.army >= 10000 ? Math.round(GS.army / 10000) + '万' : GS.army;
+  av.textContent = armyDisplay;
+  ab.style.width = Math.max(0, GS.army / 6000) + '%';
+  av.className = 'stat-value' + (GS.army < 200000 ? ' danger' : GS.army > 500000 ? ' success' : '');
+
+  tv.textContent = GS.trust;
+  tb.style.width = Math.max(5, 50 + GS.trust * 2) + '%';
+}
+
+function scrollToBottom() {
+  const area = document.getElementById('dialogue-area');
+  setTimeout(() => { area.scrollTop = area.scrollHeight; }, 100);
+}
+
+function addMessage(type, text) {
+  const area = document.getElementById('dialogue-area');
+  const div = document.createElement('div');
+  div.className = 'msg ' + type;
+  div.innerHTML = text;
+  area.appendChild(div);
+  scrollToBottom();
+  return div;
+}
+
+function showLoading(text) {
+  document.getElementById('loading-text').textContent = text || '皇帝正在思考...';
+  document.getElementById('loading-overlay').classList.add('active');
+}
+
+function hideLoading() {
+  document.getElementById('loading-overlay').classList.remove('active');
+}
+
+function showScreen(name) {
+  ['setup-screen','intro-screen','game-screen','ending-screen'].forEach(id => {
+    document.getElementById(id).style.display = 'none';
+  });
+  document.getElementById('game-screen').style.display = 'none';
+  if (name === 'game') {
+    document.getElementById('game-screen').style.display = 'flex';
+  } else {
+    document.getElementById(name + '-screen').style.display = 'flex';
+  }
+}
+
+function setChoices(choices) {
+  const container = document.getElementById('choices-container');
+  const freeInput = document.getElementById('free-input-container');
+  container.style.display = 'flex';
+  container.innerHTML = '';
+  freeInput.style.display = 'none';
+  choices.forEach((c, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.innerHTML = `<span class="choice-letter">${'ABCDEFGH'[i]}</span>${c.label}`;
+    btn.onclick = () => {
+      playClick();
+      btn.classList.add('selected');
+      setTimeout(() => { if (c.callback) c.callback(i); }, 300);
+    };
+    container.appendChild(btn);
+  });
+}
+
+function showFreeInput(placeholder) {
+  document.getElementById('choices-container').style.display = 'none';
+  const container = document.getElementById('free-input-container');
+  container.style.display = 'block';
+  document.getElementById('free-input').placeholder = placeholder || '向皇帝陛下建言献策...';
+  document.getElementById('free-input').value = '';
+  document.getElementById('free-input').focus();
+}
+
+function hideFreeInput() {
+  document.getElementById('free-input-container').style.display = 'none';
+}
+
+// ==================== GEMINI API ====================
+async function detectModels() {
+  const apiKey = document.getElementById('api-key-input').value.trim();
+  if (!apiKey) { showApiStatus('请先输入 API Key', 'error'); return; }
+
+  const btn = document.getElementById('detect-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ 正在检测...';
+  showApiStatus('正在连接 Gemini API...', 'loading');
+
+  try {
+    const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
+    const data = await resp.json();
+    if (!data.models) throw new Error('未找到模型列表');
+
+    const geminiModels = data.models
+      .filter(m => m.name.includes('gemini') && m.supportedGenerationMethods.includes('generateContent'))
+      .map(m => ({
+        name: m.name.replace('models/', ''),
+        display: m.displayName || m.name.replace('models/', ''),
+      }));
+
+    if (geminiModels.length === 0) {
+      showApiStatus('未找到可用的 Gemini 模型，请检查 API Key 权限', 'error');
+      return;
+    }
+
+    GS.apiKey = apiKey;
+    GS.availableModels = geminiModels;
+
+    const select = document.getElementById('model-select');
+    select.innerHTML = '';
+    geminiModels.forEach((m, i) => {
+      const opt = document.createElement('option');
+      opt.value = m.name;
+      opt.textContent = m.display + (i === 0 ? ' (推荐)' : '');
+      if (m.name.includes('pro') || m.name.includes('2.5')) opt.selected = true;
+      select.appendChild(opt);
+    });
+
+    // Default to latest model
+    const latest = geminiModels.find(m => m.name.includes('2.5') || m.name.includes('pro'));
+    if (latest) select.value = latest.name;
+
+    document.getElementById('model-select-group').style.display = 'block';
+    document.getElementById('start-btn').disabled = false;
+    GS.selectedModel = select.value;
+    select.onchange = () => { GS.selectedModel = select.value; };
+
+    showApiStatus(`✅ 检测到 ${geminiModels.length} 个 Gemini 模型`, 'success');
+    playSuccess();
+  } catch (err) {
+    showApiStatus(`❌ 连接失败: ${err.message}`, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🔍 自动检测可用模型';
+  }
+}
+
+function showApiStatus(msg, type) {
+  const el = document.getElementById('api-status');
+  el.textContent = msg;
+  el.className = type || '';
+}
+
+async function callGeminiAPI(systemPrompt, userMessage) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${GS.selectedModel}:generateContent?key=${GS.apiKey}`;
+  const body = {
+    system_instruction: { parts: [{ text: systemPrompt }] },
+    contents: [{ role: 'user', parts: [{ text: userMessage }] }],
+    generationConfig: { temperature: 0.85, topP: 0.95, maxOutputTokens: 400 },
+  };
+  const resp = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  if (!resp.ok) {
+    const errText = await resp.text();
+    throw new Error(`API 错误 (${resp.status}): ${errText.substring(0, 150)}`);
+  }
+  const data = await resp.json();
+  if (!data.candidates || data.candidates.length === 0) throw new Error('AI 未返回有效回复');
+  return data.candidates[0].content.parts[0].text;
+}
+
+function parseAIEvaluation(text) {
+  // Try to find the evaluation block
+  const patterns = [
+    /\[HISTORY_JUDGE:\s*stability:\s*([+-]?\d+)\s*\|\s*army:\s*([+-]?\d+)\s*\|\s*accuracy:\s*(correct|partial|wrong)\s*\|\s*note:\s*([^\]]*)\]/i,
+    /<eval>\s*stability:\s*([+-]?\d+)\s*\n?\s*army:\s*([+-]?\d+).*?\n?\s*accuracy:\s*(correct|partial|wrong)\s*\n?\s*note:\s*([^<]*)<\/eval>/is,
+    /stability:\s*([+-]?\d+).*?army:\s*([+-]?\d+).*?accuracy:\s*(correct|partial|wrong)/is,
+  ];
+
+  for (const pat of patterns) {
+    const match = text.match(pat);
+    if (match) {
+      return {
+        stability: parseInt(match[1]),
+        army: parseInt(match[2]),
+        accuracy: match[3],
+        note: (match[4] || '').trim(),
+        cleanText: text.replace(match[0], '').trim(),
+      };
+    }
+  }
+  return null;
+}
+
+// ==================== STAGE DATA ====================
+const NAPOLEON_SYSTEM_PROMPT = `你是拿破仑·波拿巴——法兰西第一帝国皇帝，时值1812年。
+
+【你的性格】
+- 骄傲、自信、战略天才，偶尔暴躁但尊重智慧
+- 自称"朕"，对下属用"你"或"卿"
+- 说话有帝王气势，但也会冷静分析
+- 深爱法兰西，将帝国命运置于一切之上
+
+【当前局势】
+- 大陆封锁令（针对英国的经济封锁）已执行四年，但走私猖獗
+- 俄国沙皇亚历山大一世公然违反封锁令，向英国开放港口
+- 你已集结大军，正在考虑是否远征俄国
+- 当前法军60万人，帝国稳定度${GS.stability}
+
+【你的任务】
+你正在与你的首席历史顾问对话。顾问会给你建议，你需要：
+1. 保持在角色中（拿破仑的语气、用词、思维）
+2. 评估建议的历史正确性
+3. 用中文回复（简短有力，不超过200字）
+
+【历史评判标准】
+- 远征俄国风险极大（焦土战术、严冬、广阔领土）——认为可轻松获胜 = 严重错误
+- 大陆封锁不能放弃——这是击败英国的核心国策
+- 亚历山大不是懦夫——低估他是致命错误
+- 在莫斯科过冬 = 灾难
+- 有限战役+明确目标 > 全面征服
+- 外交施压+军事威慑 = 更优策略
+
+【回复格式】
+每次回复末尾附上：
+[HISTORY_JUDGE: stability:数值|army:数值|accuracy:correct/partial/wrong|note:简短历史注释]
+- stability: 对帝国稳定度的影响，范围-20到+20
+- army: 对军队人数的影响（单位：人），如-30000表示损失3万人
+- accuracy: correct=历史正确的建议 / partial=部分正确 / wrong=历史错误
+- note: 简短的历史依据`;
+
+function getAct4SystemPrompt() {
+  return NAPOLEON_SYSTEM_PROMPT.replace('${GS.stability}', GS.stability);
+}
+
+// ==================== SCRIPTED DIALOGUE ====================
+function showNarration(text) {
+  addMessage('narration', '📜 ' + text);
+  speak(text);
+}
+
+async function typewriterMessage(type, text, delay=30) {
+  const div = addMessage(type, '');
+  for (let i = 0; i < text.length; i++) {
+    div.innerHTML = text.substring(0, i + 1);
+    await new Promise(r => setTimeout(r, delay));
+  }
+}
+
+async function prologue() {
+  GS.stage = 'prologue';
+  updateStats();
+  hideFreeInput();
+  document.getElementById('choices-container').style.display = 'flex';
+
+  await new Promise(r => setTimeout(r, 500));
+  playFanfare();
+  await typewriterMessage('napoleon',
+    '朕的大陆封锁令已颁布四年。英国——那头贪婪的鲸鱼——本该被勒死在它的岛上。可如今呢？走私猖獗，朕的弟弟路易在荷兰阳奉阴违，俄国沙皇亚历山大更是公然向英国商人敞开港口！<br><br>首席顾问，告诉朕——帝国眼下最大的隐患是什么？');
+  speak('告诉朕，帝国眼下最大的隐患是什么？');
+
+  setChoices([
+    { label: '俄国违抗封锁令，必须加以惩戒，否则大陆体系将土崩瓦解', callback: async () => {
+      GS.correctCount++; GS.trust += 5;
+      addMessage('advisor', '陛下，俄国违抗封锁令，必须加以惩戒。否则，全欧洲都会效仿沙皇，大陆体系将土崩瓦解。');
+      playSuccess();
+      await typewriterMessage('napoleon', '说得好！朕与亚历山大曾在提尔西特握手言和，他却背信弃义。俄国的问题必须解决……但怎么解决？继续说吧。');
+      setTimeout(() => act1_lockdown(), 1200);
+    }},
+    { label: '英国海军太强，封锁不切实际，不如另寻他策', callback: async () => {
+      GS.stability -= 5; GS.trust -= 5;
+      addMessage('advisor', '陛下，英国皇家海军称霸海洋，单靠封锁恐怕不切实际……不如另寻他策？');
+      playFail();
+      await typewriterMessage('napoleon', '你这是长他人志气！朕的柏林敕令和米兰敕令已经让英国进出口暴跌。封锁正在生效，只是需要时间！<br><br>不过……朕欣赏你的直言。说回俄国。');
+      setTimeout(() => act1_lockdown(), 1200);
+    }},
+    { label: '西班牙的游击战消耗太大，应先解决半岛问题', callback: async () => {
+      GS.stability -= 10;
+      addMessage('advisor', '陛下，西班牙的游击战已经消耗了太多兵力。依臣之见，应先解决半岛战争。');
+      playFail();
+      await typewriterMessage('napoleon', '西班牙是西班牙，俄国是俄国！朕的哥哥约瑟夫在马德里，威灵顿不过是在拖延时间。眼下最让朕头疼的是亚历山大那个伪君子！');
+      addMessage('narration', '📖 <strong>【历史真相溯源】</strong> 1812年时，半岛战争（西班牙）虽在进行，但拿破仑当前最焦虑的是对俄关系。他将西班牙视为"溃疡"，但认为俄国才是决定欧洲格局的关键。');
+      setTimeout(() => act1_lockdown(), 1500);
+    }},
+  ]);
+}
+
+async function act1_lockdown() {
+  GS.stage = 'act1';
+  updateStats();
+
+  await new Promise(r => setTimeout(r, 800));
+  await typewriterMessage('napoleon',
+    '封锁要奏效，全欧洲必须铁板一块。可朕的弟弟路易——荷兰国王——竟纵容走私！还有那不勒斯的缪拉……<br><br>顾问，你告诉朕：这封锁到底该怎么执行？');
+  speak('这封锁到底该怎么执行？');
+
+  setChoices([
+    { label: '严惩走私者，加强缉私舰队，杀一儆百', callback: async () => {
+      GS.stability -= 3; GS.correctCount++;
+      addMessage('advisor', '陛下，必须以雷霆手段打击走私！加强缉私舰队，严惩违令者，杀一儆百。');
+      playSuccess();
+      await typewriterMessage('napoleon', '严刑峻法——朕喜欢。但光靠惩罚还不够……朕的弟弟路易才是大问题。他竟说"荷兰的利益与法国不同"——荒谬！你说，朕该怎么处置他？');
+      setTimeout(() => act1_holland(), 1000);
+    }},
+    { label: '发放特许贸易证，允许有限通商，以经济手段疏导走私', callback: async () => {
+      GS.stability -= 12;
+      addMessage('advisor', '陛下，堵不如疏。发放特许贸易证，有限通商，以经济手段疏导，比一味禁止更有效。');
+      playFail();
+      await typewriterMessage('napoleon', '特许贸易证？！你这是要朕给走私合法化！大陆封锁是朕击败英国的唯一武器——你竟要动摇国本！<br><br>不过……朕姑且听你继续说。荷兰那边呢？');
+      setTimeout(() => act1_holland(), 1000);
+    }},
+    { label: '封锁本就是错的，英国经济根本封锁不住，不如放弃', callback: async () => {
+      GS.stability -= 25; GS.wrongCount++;
+      addMessage('advisor', '陛下，恕臣直言——封锁本就是错的。英国有制海权，经济封锁困不住它。不如放弃大陆封锁。');
+      playFail();
+      await typewriterMessage('napoleon', '<strong>放肆！！</strong>朕的柏林敕令是整个帝国的基石！你竟敢让朕向英国人低头？！<br><br>给朕记住——没有大陆封锁，就没有朕的欧洲！');
+      addMessage('narration', '📖 <strong>【历史真相溯源】</strong> 大陆封锁令是拿破仑击败英国的核心国策。1806年柏林敕令明确写道："不列颠群岛处于封锁状态"。否定封锁，等于否定拿破仑整个对外政策的基石。在当时的历史语境下，这不可能是选项。');
+      setTimeout(() => act1_holland(), 1500);
+    }},
+  ]);
+}
+
+async function act1_holland() {
+  setChoices([
+    { label: '罢黜路易，将荷兰直接并入法兰西帝国', callback: async () => {
+      GS.stability += 5; GS.correctCount++; GS.trust += 5;
+      addMessage('advisor', '陛下，国事重于亲情。罢黜路易国王，将荷兰直接并入帝国。唯有直辖，方能确保封锁令的执行。');
+      playSuccess();
+      addMessage('narration', '📖 <strong>【历史真相溯源】</strong> 1810年7月，拿破仑确实废黜了弟弟路易·波拿巴，吞并荷兰王国。路易因纵容走私和保护荷兰利益与拿破仑发生激烈冲突，最终被迫退位，流亡奥地利。');
+      await typewriterMessage('napoleon', '你说到朕心坎里了。朕已经容忍路易太久了——一个国王若置帝国利益于不顾，就不配戴王冠。<br><br>现在，让朕来谈谈俄国……');
+      setTimeout(() => act2_russia(), 1500);
+    }},
+    { label: '说服路易，晓以利害，让他自愿配合', callback: async () => {
+      GS.stability -= 5;
+      addMessage('advisor', '陛下，路易毕竟是您的弟弟。不如召他来巴黎，晓以利害，让他自愿配合封锁。');
+      playFail();
+      await typewriterMessage('napoleon', '你太不了解朕的弟弟了。朕已经给过他无数次机会！他每次都说"是是是"，回去照旧。不——亲情不能凌驾于国事之上。<br><br>朕会处理路易。现在，说俄国。');
+      setTimeout(() => act2_russia(), 1200);
+    }},
+  ]);
+}
+
+async function act2_russia() {
+  GS.stage = 'act2';
+  updateStats();
+
+  await new Promise(r => setTimeout(r, 800));
+  await typewriterMessage('napoleon',
+    '沙皇亚历山大！朕曾与他在提尔西特的木筏上握手言和，结为盟友。可如今他竟敢颁布新关税法令——对英国货只征低税，对法国货课以重税！<br><br>这是赤裸裸的挑衅！顾问，告诉朕——<strong>俄国人到底想要什么？</strong>');
+  speak('俄国人到底想要什么？');
+
+  setChoices([
+    { label: '俄国经济撑不住了——封锁让它濒临崩溃，它需要英国贸易', callback: async () => {
+      GS.stability += 5; GS.correctCount++; GS.trust += 5;
+      addMessage('advisor', '陛下，俄国经济撑不住了。封锁让俄国的木材、粮食、麻绳失去买家，贵族怨声载道。沙皇需要英国贸易来维持经济。');
+      playSuccess();
+      await typewriterMessage('napoleon', '你说得对……俄国经济确实依赖对英贸易。但这不能成为背叛的借口！朕给过他波兰的承诺，给过他奥斯曼的诱惑——他全都不满足！<br><br>现在的问题是：朕该怎么回应？');
+      setTimeout(() => act2_choice(), 1000);
+    }},
+    { label: '亚历山大想吞并波兰，借英国牵制我们', callback: async () => {
+      GS.correctCount++;
+      addMessage('advisor', '陛下，沙皇觊觎波兰已久。他借英国牵制我们，好腾出手来向东扩张。');
+      playSuccess();
+      await typewriterMessage('napoleon', '哼，波兰是朕的华沙大公国，他休想染指。不过你的分析不无道理……<br><br>那么，朕该怎么回应俄国的挑衅？');
+      setTimeout(() => act2_choice(), 1000);
+    }},
+    { label: '亚历山大是个懦夫——打一顿就老实了', callback: async () => {
+      GS.stability -= 10; GS.wrongCount++;
+      addMessage('advisor', '陛下，沙皇不过是个优柔寡断的懦夫。只需大军压境，他自然俯首称臣。');
+      playFail();
+      await typewriterMessage('napoleon', '哈！朕在奥斯特里茨打败过他的军队，在弗里德兰粉碎过他的防线——但你要是以为亚历山大是懦夫，那就大错特错了！他忍耐力极强，而且在俄国国内威望很高。<br><br>不要低估敌人。这是朕从二十年的战争中学会的。');
+      addMessage('narration', '📖 <strong>【历史真相溯源】</strong> 亚历山大一世绝非懦夫。他在奥斯特里茨惨败（1805年）和弗里德兰战役（1807年）后能忍辱负重，推行国内改革，并在1812年卫国战争中展现了惊人的韧性。将其简单归为"懦夫"是对历史的严重误读。');
+      setTimeout(() => act2_choice(), 1500);
+    }},
+  ]);
+}
+
+async function act2_choice() {
+  setChoices([
+    { label: '先外交施压，集结军队作威慑，给俄国最后一次机会', callback: async () => {
+      GS.stability += 5; GS.correctCount++; GS.trust += 5;
+      addMessage('advisor', '陛下，先外交施压。集结军队在波兰边境作威慑，同时派遣特使给沙皇最后一次通牒。师出有名，方能服众。');
+      playSuccess();
+      await typewriterMessage('napoleon', '明智的建议。朕已下令大军向波兰集结。同时，朕会让科兰古去圣彼得堡——不过朕不抱太大希望。<br><br>亚历山大已经铁了心要跟朕作对……');
+      setTimeout(() => act3_crossroads(), 2000);
+    }},
+    { label: '立刻宣战！60万大军踏平莫斯科', callback: async () => {
+      GS.stability -= 10; GS.army -= 50000; GS.trust -= 5;
+      addMessage('advisor', '陛下！时不我待——立刻宣战！集合60万大军，踏平莫斯科！让沙皇知道违抗法兰西的代价！');
+      playFail();
+      await typewriterMessage('napoleon', '你说出了朕心中所想……但60万大军仓促出征，光是集结和补给就是一场噩梦。朕已为此损失了五万人——有些死于疾病，有些开了小差。<br><br>但现在箭已在弦上。朕需要最后的建议……');
+      setTimeout(() => act3_crossroads(), 2000);
+    }},
+    { label: '容忍俄国，专注解决英国问题', callback: async () => {
+      GS.stability -= 12;
+      addMessage('advisor', '陛下，容忍俄国。它终究不是头号大敌。专注解决英国，才是上策。');
+      playFail();
+      await typewriterMessage('napoleon', '容忍？！朕容忍他已经两年了！现在全欧洲都在看——如果朕对亚历山大听之任之，普鲁士、奥地利、瑞典——所有人都会效仿。<br><br>不。朕必须在俄国问题上做出决断。');
+      setTimeout(() => act3_crossroads(), 1500);
+    }},
+  ]);
+}
+
+async function act3_crossroads() {
+  GS.stage = 'act3';
+  updateStats();
+
+  await new Promise(r => setTimeout(r, 800));
+  await typewriterMessage('napoleon',
+    '<strong>大军已经集结。科西嘉的雄鹰要再次展翅了。</strong><br><br>但在出发之前，朕要听你最后的谏言——<br>带多少兵？走哪条路？以什么为最终目标？<br><br><em>这是最关键的决定。朕需要你最清醒的判断。</em>');
+  speak('这是最关键的决定。朕需要你最清醒的判断。');
+
+  let choices = [
+    { label: '60万大军，速战速决，在边境歼灭俄军主力', callback: async (i) => {
+      GS.army -= 20000; GS.hasSupply = false;
+      addMessage('advisor', '陛下！集结所有兵力——60万大军，长驱直入，速战速决！在俄国西部边境一举歼灭俄军主力，迫其投降！');
+      playFail();
+      await typewriterMessage('napoleon', '你信心十足。朕也希望如此……但俄国人一向不按规矩打仗。他们可能会撤退，会把朕引入更深的陷阱。<br><br>大军已经渡过涅曼河。出征！');
+      addMessage('narration', '📖 1812年6月24日，拿破仑率60万大军渡过涅曼河，开始了历史上最著名的军事冒险。但俄军采取了焦土战术，一路撤退……');
+      setTimeout(() => act4_expedition(), 2000);
+    }},
+    { label: '30万大军，只攻占波兰边境，逼俄国谈判', callback: async (i) => {
+      GS.stability += 5; GS.army -= 5000; GS.correctCount++; GS.trust += 5;
+      addMessage('advisor', '陛下，以30万兵力发动一场有限战役即可。目标限于占领波兰边境省份，逼迫沙皇回到谈判桌。不必深入俄国腹地。');
+      playSuccess();
+      await typewriterMessage('napoleon', '你比朕想象的更谨慎……朕会考虑的。但亚历山大若仍然拒绝谈判呢？到时候朕需要更大的筹码。<br><br>先以30万开拔。随朕出征。');
+      setTimeout(() => act4_diplomacy(), 2000);
+    }},
+    { label: '暂不出兵，用经济封锁反制俄国', callback: async (i) => {
+      GS.stability -= 3; GS.correctCount++;
+      addMessage('advisor', '陛下，暂不出兵。进一步加强经济封锁，联合奥地利和普鲁士共同对俄施压。战争是最后的选择。');
+      playSuccess();
+      await typewriterMessage('napoleon', '你说得有道理……但朕的将军们早已按捺不住。也罢——朕先以有限兵力做威慑，同时展开外交攻势。<br><br>梅特涅那边……朕可以谈谈。');
+      setTimeout(() => act4_diplomacy(), 2000);
+    }},
+    { label: '60万大军，但必须带足补给，做好长期作战准备', callback: async (i) => {
+      GS.stability += 3; GS.correctCount++; GS.hasSupply = true; GS.trust += 3;
+      addMessage('advisor', '陛下，若必须出征，请务必带足补给！建立前进仓库，准备冬装，征调最好的军需官。俄国不是普鲁士——它的纵深太大了。');
+      playSuccess();
+      await typewriterMessage('napoleon', '你说到点子上了。朕已下令辎重部队扩大三倍——但朕还是低估了俄国的面积。<br><br>也罢，有了充足的补给，至少不会出现最坏的情况……出发吧。');
+      addMessage('narration', '📖 <strong>【补给充足】Buff 已获得！</strong> 历史上拿破仑因补给不足损失了大量兵力。你的建议将在后续阶段减少损失。');
+      setTimeout(() => act4_expedition(), 2000);
+    }},
+  ];
+
+  // If trust is high, give a hint
+  if (GS.correctCount >= 3) {
+    addMessage('system', '💡 拿破仑盯着地图沉默了许久……"继续说。朕在听。"<br><em>（你积累了足够的信任，皇帝愿意多听你的意见。）</em>');
+  }
+
+  setChoices(choices);
+}
+
+// ==================== ACT 4 AI FREE DIALOGUE ====================
+async function act4_expedition() {
+  GS.stage = 'act4_expedition';
+  updateStats();
+
+  await new Promise(r => setTimeout(r, 500));
+  addMessage('system', '⚔️ <strong>进入最终关卡：莫斯科之路</strong><br>你现在可以直接与拿破仑皇帝对话。你的每一次建言都将被AI实时评估历史正确性，并影响帝国命运。<br><br><em>提示：记住历史教训——焦土战术、严冬、广阔领土是俄国的三大武器。</em>');
+
+  await typewriterMessage('napoleon',
+    '大军已跨过涅曼河，深入俄国领土。但奇怪的是——<strong>俄国人没有迎战。</strong>他们一直在撤退，一边撤退一边烧毁粮仓、填死水井。<br><br>已经行军一个月了，补给线越拉越长。各军团之间开始脱节。朕的斥候报告说俄军在斯摩棱斯克方向集结……<br><br>顾问——朕该怎么做？');
+  speak('俄国人一直在撤退。朕该怎么做？');
+
+  GS.act4Turn = 0;
+  showFreeInput('在这关键时刻，你想对皇帝说什么？...');
+}
+
+async function act4_diplomacy() {
+  GS.stage = 'act4_diplomacy';
+  updateStats();
+
+  await new Promise(r => setTimeout(r, 500));
+  addMessage('system', '🕊️ <strong>进入最终关卡：外交周旋</strong><br>你选择了较为克制的路线。现在直接与拿破仑皇帝对话——你的外交策略将决定帝国能否在不流血的情况下迫使俄国妥协。');
+
+  await typewriterMessage('napoleon',
+    '你没有劝朕倾巢而出——这很好。但朕不能什么都不做。亚历山大在看，全欧洲都在看。<br><br>不靠刺刀，如何让俄国的熊低头？<br>告诉朕你的方略。');
+  speak('不靠刺刀，如何让俄国的熊低头？');
+
+  GS.act4Turn = 0;
+  showFreeInput('向皇帝阐述你的外交方略...');
+}
+
+async function submitAdvice() {
+  const input = document.getElementById('free-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = '';
+  document.getElementById('send-btn').disabled = true;
+  playClick();
+
+  addMessage('advisor', text);
+  GS.act4Turn++;
+
+  // Check game over conditions
+  if (GS.stability <= 0 || GS.army <= 0) {
+    await triggerEnding();
+    return;
+  }
+
+  if (GS.act4Turn >= GS.maxAct4Turns) {
+    addMessage('system', '⚜️ 皇帝需要做出最终决定……');
+    await triggerEnding();
+    return;
+  }
+
+  showLoading('皇帝正在思考你的建议...');
+
+  try {
+    const systemPrompt = getAct4SystemPrompt();
+    const contextPrompt = `当前状态：帝国稳定度=${GS.stability}，法军主力=${GS.army}人。已对话${GS.act4Turn}轮。顾问刚才说："${text}"。请以拿破仑的身份回复并附上评估。`;
+    const response = await callGeminiAPI(systemPrompt, contextPrompt);
+    hideLoading();
+
+    const evalData = parseAIEvaluation(response);
+    const displayText = evalData ? evalData.cleanText : response;
+
+    await typewriterMessage('napoleon', displayText);
+    speak(displayText);
+
+    if (evalData) {
+      GS.stability = Math.max(0, Math.min(100, GS.stability + evalData.stability));
+      GS.army = Math.max(0, GS.army + evalData.army);
+
+      if (evalData.accuracy === 'correct') { GS.correctCount++; playSuccess(); }
+      else if (evalData.accuracy === 'wrong') { GS.wrongCount++; playFail(); }
+
+      if (evalData.note) {
+        addMessage('narration', `📖 <strong>【评估】</strong> ${evalData.note} (稳定度 ${evalData.stability >= 0 ? '+' : ''}${evalData.stability}, 军队 ${evalData.army >= 0 ? '+' : ''}${Math.round(evalData.army/10000)}万)`);
+      }
+
+      updateStats();
+    }
+
+    // Check if should end
+    if (GS.stability <= 0 || GS.army <= 0 || GS.act4Turn >= GS.maxAct4Turns) {
+      addMessage('system', GS.stability <= 0 ? '💀 帝国的根基已经动摇……' : GS.army <= 0 ? '⚰️ 大军已经覆灭……' : '⚜️ 皇帝必须做出最终决定了……');
+      setTimeout(() => triggerEnding(), 2000);
+    }
+  } catch (err) {
+    hideLoading();
+    GS.act4Turn--; // Don't count failed turns
+    addMessage('system', `❌ AI 连接失败: ${err.message}<br>请检查网络和 API Key 是否有效。`);
+    // Fallback: allow retry
+  }
+
+  document.getElementById('send-btn').disabled = false;
+  document.getElementById('free-input').focus();
+}
+
+// ==================== ENDINGS ====================
+async function triggerEnding() {
+  const finalRoute = GS.stage; // Save before overwriting
+  GS.stage = 'ending';
+  hideFreeInput();
+  document.getElementById('choices-container').style.display = 'none';
+  updateStats();
+
+  showLoading('正在编纂帝国史册...');
+
+  let endingIcon, endingTitle, endingText, tracingText = '';
+
+  const trustBonus = GS.trust >= 10 ? ' + 皇帝信任加成' : '';
+
+  if (finalRoute === 'act4_diplomacy') {
+    if (GS.stability >= 70 && GS.army >= 450000) {
+      endingIcon = '🏆'; endingTitle = '不战而屈人之兵';
+      endingText = '你的外交智慧让帝国避免了一场毁灭性的远征。拿破仑通过联合奥地利、普鲁士施压，加上有限军事威慑，迫使沙皇部分妥协。大陆封锁虽未完美执行，但帝国主力得以保全——1812年没有成为转折点。';
+    } else if (GS.stability >= 40) {
+      endingIcon = '⚖️'; endingTitle = '勉力维持';
+      endingText = '外交取得部分成效，但帝国元气仍在缓慢流失。俄国问题没有根本解决，但至少没有雪上加霜。拿破仑继续在全欧洲推行封锁，勉力维持着帝国的版图。';
+    } else {
+      endingIcon = '💀'; endingTitle = '内部崩溃';
+      endingText = '不打俄国——但封锁造成的经济压力引爆了国内矛盾。物价飞涨、走私泛滥、盟国离心。帝国的崩溃只是时间问题。';
+    }
+  } else {
+    // Expedition ending
+    if (GS.army >= 350000 && GS.stability >= 50) {
+      endingIcon = '🥇'; endingTitle = '力挽狂澜';
+      endingText = '你的谏言让皇帝在关键时刻悬崖勒马。虽然经历艰险、损失了部分兵力——但帝国主力得以保全。拿破仑从莫斯科撤退时，带回的是一支虽已疲惫但仍完整的军队。历史的天平，被你轻轻拨动了一寸。';
+    } else if (GS.army >= 150000) {
+      endingIcon = '🥈'; endingTitle = '惨胜如败';
+      endingText = '大军归来，十不存五。博罗金诺的惨胜和莫斯科的大火吞噬了帝国最精锐的力量。拿破仑的帝国从此不可逆转地走向下坡路——1813年的莱比锡和1814年的枫丹白露已在等待着他。';
+    } else if (GS.army >= 50000) {
+      endingIcon = '🥉'; endingTitle = '历史重演';
+      endingText = '1812年的冬天吞噬了欧洲最强大的军队。60万大军渡涅曼河，不足10万人生还。你没能改变历史——但至少你现在明白，为什么它无法被改变了。别列津纳河的冰水至今仍在诉说着那个冬天的故事。';
+    } else {
+      endingIcon = '💀'; endingTitle = '帝国的黄昏';
+      endingText = '你的每一个建议都精准地踩中了历史的陷阱。全军覆没。1814年4月，拿破仑在枫丹白露宫签署退位诏书，被流放到厄尔巴岛。帝国的鹰旗在寒风中落下。';
+    }
+  }
+
+  // History tracing
+  if (GS.wrongCount >= 3) {
+    tracingText += '<br>📖 <strong>【完整历史溯源】</strong><br>';
+    tracingText += '1812年远征俄国是拿破仑帝国由盛转衰的转折点。60万大军出征，仅约10万人生还。<br>';
+    tracingText += '失败原因：① 焦土战术使法军无法就地补给；② 俄国严冬（低至-30°C）致命；③ 广阔的领土使补给线不堪重负；④ 俄军避免决战，保存实力。<br>';
+    tracingText += '最终：1814年拿破仑退位，1815年滑铁卢终局。';
+  } else if (GS.correctCount >= 4) {
+    tracingText += '<br>🌟 <strong>【历史洞察者】</strong> 你展现了出色的历史洞察力。你理解了1812年战役的核心教训：在广袤的俄国领土上，后勤、气候和敌人的战术远比人数优势更重要。';
+  }
+
+  hideLoading();
+  playFanfare();
+
+  document.getElementById('ending-icon').textContent = endingIcon;
+  document.getElementById('ending-title').textContent = endingTitle;
+  document.getElementById('ending-text').textContent = endingText;
+  document.getElementById('ending-tracing').innerHTML = tracingText;
+
+  const statsHTML = `
+    <div class="end-stat"><div class="end-stat-val">${GS.stability}</div><div class="end-stat-lbl">最终稳定度</div></div>
+    <div class="end-stat"><div class="end-stat-val">${GS.army >= 10000 ? Math.round(GS.army/10000) + '万' : GS.army}</div><div class="end-stat-lbl">残余兵力</div></div>
+    <div class="end-stat"><div class="end-stat-val">${GS.correctCount}</div><div class="end-stat-lbl">正确建议</div></div>
+    <div class="end-stat"><div class="end-stat-val">${GS.wrongCount}</div><div class="end-stat-lbl">历史误判</div></div>
+  `;
+  document.getElementById('ending-stats').innerHTML = statsHTML;
+
+  showScreen('ending');
+  stopMusic();
+}
+
+// ==================== GAME FLOW ====================
+function startGame() {
+  GS.apiKey = document.getElementById('api-key-input').value.trim();
+  GS.selectedModel = document.getElementById('model-select').value;
+  if (!GS.apiKey || !GS.selectedModel) return;
+
+  // Save API key for convenience
+  if (GS.apiKey) localStorage.setItem('napoleon_game_api_key', GS.apiKey);
+
+  playClick();
+  initAudio();
+  showScreen('intro');
+}
+
+function beginGame() {
+  playClick();
+  initAudio();
+  startMusic();
+  showScreen('game');
+  document.getElementById('dialogue-area').innerHTML = '';
+  resetGameState();
+  updateStats();
+  setTimeout(() => prologue(), 800);
+}
+
+function resetGameState() {
+  GS.stability = 100;
+  GS.army = 600000;
+  GS.trust = 0;
+  GS.correctCount = 0;
+  GS.wrongCount = 0;
+  GS.stage = 'prologue';
+  GS.historyLog = [];
+  GS.hasSupply = false;
+  GS.act4Turn = 0;
+}
+
+function replayGame() {
+  playClick();
+  document.getElementById('choices-container').style.display = 'flex';
+  document.getElementById('free-input-container').style.display = 'none';
+  showScreen('game');
+  document.getElementById('dialogue-area').innerHTML = '';
+  resetGameState();
+  updateStats();
+  startMusic();
+  setTimeout(() => prologue(), 600);
+}
+
+// ==================== INIT ====================
+function init() {
+  initParticles();
+
+  // Enter key handler
+  document.getElementById('free-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      submitAdvice();
+    }
+  });
+
+  // API key enter detection
+  document.getElementById('api-key-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      detectModels();
+    }
+  });
+
+  // Load saved API key
+  const savedKey = localStorage.getItem('napoleon_game_api_key');
+  if (savedKey) {
+    document.getElementById('api-key-input').value = savedKey;
+  }
+
+  // Preload voices
+  if ('speechSynthesis' in window) {
+    speechSynthesis.getVoices();
+    speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+  }
+
+  console.log('⚜️ 皇上的锦囊：拿破仑的帝国危局 — 已就绪');
+  console.log('🎮 序幕-第三幕：预设剧本分支 | ⚔️ 第四幕：Gemini AI 自由对话');
+  console.log('📖 设计：基于1812年拿破仑远征俄国史实');
+}
+
+init();
+</script>
+</body>
+</html>
